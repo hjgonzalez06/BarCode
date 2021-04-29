@@ -15,13 +15,16 @@ import java.awt.print.PrinterJob;
 import java.io.*;
 import java.util.logging.*;
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import net.sourceforge.barbecue.*;
 import net.sourceforge.barbecue.output.OutputException;
 
 public class codigobarras extends javax.swing.JFrame {
 
     private static int I = 0;
-    
+    private static String Location = "";
+
     public codigobarras() {
         initComponents();
     }
@@ -137,80 +140,101 @@ public class codigobarras extends javax.swing.JFrame {
     }//GEN-LAST:event_textcodigoActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        
+
         Barcode barcode = null;
-        try{
-            barcode = BarcodeFactory.createCode39(textcodigo.getText(),true);
-        }catch(Exception e){}
+        try {
+            barcode = BarcodeFactory.createCode39(textcodigo.getText(), true);
+        } catch (Exception e) {
+        }
         barcode.setDrawingText(false);
         barcode.setBarHeight(60);
         barcode.setBarWidth(2);
-        BufferedImage img = new BufferedImage(300,100,BufferedImage.TYPE_INT_ARGB);
-        
+        BufferedImage img = new BufferedImage(300, 100, BufferedImage.TYPE_INT_ARGB);
+
         Graphics2D g = (Graphics2D) img.getGraphics();
-        
-        try{
-            barcode.draw(g,5,20);
-        }catch(Exception e){}
-        
+
+        try {
+            barcode.draw(g, 5, 20);
+        } catch (Exception e) {
+        }
+
         ImageIcon icon = new ImageIcon(img);
         lblcode.setIcon(icon);
-        
+
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        
+
         Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
         ImageIcon image = (ImageIcon) lblcode.getIcon();
         CopiarImagen dh = new CopiarImagen(image.getImage());
-        cb.setContents(dh,null);
-        
+        cb.setContents(dh, null);
+
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        
+
         Barcode barcode = null;
-        try{
-            barcode = BarcodeFactory.createCode39(textcodigo.getText(),true);
-        }catch(Exception e){}
+        try {
+            barcode = BarcodeFactory.createCode39(textcodigo.getText(), true);
+        } catch (Exception e) {
+        }
         barcode.setDrawingText(false);
         barcode.setBarHeight(60);
         barcode.setBarWidth(2);
-        
-        try{
-            FileOutputStream fos = new FileOutputStream("C:/Users/Usuario/Documents/NetBeansProjects/Barcode/Etiquetas/cod_barras"+ ++I +".png");
+
+        //Fixing Directory for saving
+        try {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            chooser.showOpenDialog(null);
+            File f = chooser.getSelectedFile();
+            String filename = f.getAbsolutePath();
+            System.out.println("filename = " + filename);
+            Location = filename;
+            if (!"".equals(Location)) {
+                Location = Location + "/";
+            }
+        } catch (Exception e) {
+            System.out.println("No directory choosen : " + e);
+            JOptionPane.showMessageDialog(null, "No directory choosen \nThe file will be saved on default directory");
+        }
+        //Using textcodigo text to define image generated as [cod_barras + textcodigo]
+        try {
+            FileOutputStream fos = new FileOutputStream(Location + "cod_barras " + textcodigo.getText() + ".png");
             try {
                 BarcodeImageHandler.writePNG(barcode, fos);
             } catch (OutputException O) {
                 Logger.getLogger(codigobarras.class.getName()).log(Level.SEVERE, null, O);
             }
-        }catch(FileNotFoundException F){
-            Logger.getLogger(codigobarras.class.getName()).log(Level.SEVERE,null,F);
+        } catch (FileNotFoundException F) {
+            Logger.getLogger(codigobarras.class.getName()).log(Level.SEVERE, null, F);
         }
-        
+
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        
+
         Barcode barcode = null;
-        try{
-            barcode = BarcodeFactory.createCode39(textcodigo.getText(),true);
-        }catch(Exception e){}
+        try {
+            barcode = BarcodeFactory.createCode39(textcodigo.getText(), true);
+        } catch (Exception e) {
+        }
         barcode.setDrawingText(false);
         barcode.setBarHeight(60);
         barcode.setBarWidth(2);
-        
+
         PrinterJob job = PrinterJob.getPrinterJob();
         job.setPrintable(barcode);
-        
-        if(job.printDialog()){
+
+        if (job.printDialog()) {
             try {
                 job.print();
             } catch (PrinterException P) {
                 Logger.getLogger(codigobarras.class.getName()).log(Level.SEVERE, null, P);
             }
         }
-        
+
     }//GEN-LAST:event_jButton4ActionPerformed
 
     public static void main(String args[]) {
